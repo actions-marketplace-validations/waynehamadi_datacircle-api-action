@@ -1,0 +1,31 @@
+name: 'Datacircle: best GTM API'
+description: 'Find the best GTM APIs. Get the top-scoring plans for any GTM API from Datacircle, with no key.'
+author: 'Datacircle'
+branding:
+  icon: 'search'
+  color: 'blue'
+inputs:
+  api:
+    description: 'The API slug, for example email-finder. Leave empty to list every API.'
+    required: false
+    default: ''
+outputs:
+  result:
+    description: 'The answer as JSON'
+    value: ${{ steps.call.outputs.result }}
+runs:
+  using: 'composite'
+  steps:
+    - id: call
+      shell: bash
+      env:
+        API_SLUG: ${{ inputs.api }}
+      run: |
+        base=https://api.datacircle.dev/v1
+        if [ -n "$API_SLUG" ]; then url="$base/apis/$API_SLUG/best"; else url="$base/apis"; fi
+        body=$(curl -fsS "$url")
+        {
+          echo "result<<DATACIRCLE_EOF"
+          echo "$body"
+          echo "DATACIRCLE_EOF"
+        } >> "$GITHUB_OUTPUT"
